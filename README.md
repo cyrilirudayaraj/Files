@@ -1,15 +1,20 @@
-Step A & B: Existing and Embedded Base
-1. From the user uploaded list of locations falling within the analysis area, identify all existing transmitters and embedded base transmitters with an active project that cover at least one location.
-2. Identify any embedded base sites without a carrier add project that are within the analysis area. Also include all embedded base sites within 10km of the analysis area.
-3. Generate coverage for all transmitters in Step 2 using NPP PoD, if current coverage is not available.
 
-Step C: SMDB Sites
-1. Identify SMDB sites falling within the analysis area, including within a 10km buffer.
-2. Eliminate SMDB sites which violate ISD (Intersite Distance) criteria with Step A+B+C sites
-3. Generate coverage for each Step 2 transmitter using NPP POD.
+AFFIDAVIT 
+By this Affidavit, I, the deponent Mr. Cyril Irudayaraj Joseph, S/o Mr. Arelious, aged about 31 years, residing at 3 First Cross Nethaji Nagar, Ammal Chattiram, Karaikal, 609604, India do hereby declare on oath that: -
+1.	That, I am a Citizen of France, holder of French Passport number 16CE29324 issued on 24-10-2016 and valid until 24-10-2026.
 
-Step D: New sites
-1. Identify locations not covered by sites in Steps A, B, and C.
-2. Using user defined ISD and min/max location counts (as specified as part of project creation), run DB scan clustering on the uncovered locations.
-3. Ignore clusters where the centroid of the cluster violates the ISD constraint with sites from Steps A, B, and C.
+2.	That, my name mentioned in my French passport is CYRIL IRUDAYARAJ (name) and JOSEPH (surname).
+
+3.	 That, my name mentioned in my payslips, form16 is CYRIL IRUDAYARAJ.
+
+4.	That, name mentioned in my Degree of Bachelor of Electronics and Communication Engineering issued by Pondicherry University bearing Registration number 293176030 dated May 2012 and in bank statements is CYRIL IRUDAYARAJ.A.
+
+I hereby declare;
+i)	That, names CYRIL IRUDAYARAJ JOSEPH, CYRIL IRUDAYARAJ.A, CYRIL IRUDAYARAJ is of one and same person and belongs to me.
+I hereby confirm that all the facts stated herein above are true and correct as per my belief and knowledge and no facts have been concealed in this affidavit.
+                                                                                                                                               
+Date: 09th December 2022
+Place: Karaikal, India        				Deponent
+
+
 
