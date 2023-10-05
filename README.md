@@ -1,236 +1,264 @@
-import React, { useRef } from 'react';
-import * as Highcharts from 'highcharts';
-import HighchartsReact from 'highcharts-react-official';
-
-let projectSummary = {
-  totalSites: '1000',
-  existingOnAirProjects: '200',
-  locCoveredExistProj: '200',
-  embActiveProjects: '200',
-  locCoveredEmbActiveProj: '200',
-  embNotActiveProjects: '300',
-  locCoveredEmbNotActiveProj: '300',
-  nbActiveProjects: '250',
-  locCoveredNbActiveProj: '250',
-  nbSmdbProjects: '37',
-  locCoveredNbSmdbProj: '37',
-  nbRawLandProjects: '13',
-  locCoveredNbRawLandProj: '13',
-};
-
-let locationDetails = {
-  existingOnAirProjUsableCap: '20',
-  embActiveProjUsableCap: '20',
-  embNotActiveProjUsableCap: '30',
-  nbActiveProjUsableCap: '25',
-  nbSmdbProjUsableCap: '3.7',
-  nbRawLandProjUsableCap: '1.3',
-};
-
 let options = {
-  chart: {
-    type: 'pie',
-    //width: 400,
-    //height: 300,
-    //height: (16 / 16) * 100 + "%",
-    //marginTop: -200,
-  },
-  title: {
-    text: 'Site Summary',
-    style: {
-      fontWeight: 'bold',
-      fontSize: '12px',
-      color: '#CD040B',
-      fontFamily: '"nhg-display-bold", arial, sans-serif',
-    },
-    x: -10,
-    y: 0,
-  },
-  subtitle: {
-    text:
-      'Total sites:' +
-      Number(projectSummary?.totalSites).toLocaleString('en-US'),
-    style: {
-      fontSize: '10px',
-      color: 'black',
-    },
-    x: -10,
-    y: 20,
-  },
+    chart: {
+      type: "pie",
+      //width: 363,
+      // height: 300,
+      events: {
+        drilldown: function (e) {
+          this.axes.forEach((axis) =>
+            axis.update({ visible: true }, false, false)
+          );
 
-  plotOptions: {
-    allowPointSelect: true,
-    cursor: 'pointer',
-    pie: {
-      //size: 200,
-      startAngle: -90,
-      endAngle: 90,
-      center: ['50%', '75%'],
-    },
-    series: {
-      dataLabels: {
-        enabled: true,
-        padding: 0,
-        allowOverlap: true,
-        crop: false,
-        overflow: 'none',
-        formatter: function () {
-          if (this.y === 0) {
-            return null;
+          this.reflow();
+          if (!e.seriesOptions) {
+            if (e.point?.name === "OFS") {
+              this.setTitle(null, {
+                text:
+                  "Total OFS:" +
+                  Number(projectSummary?.totalLocCovered)?.toLocaleString(
+                    "en-US"
+                  ),
+              });
+              var chart = this,
+                drilldowns1 = {
+                  OFS: {
+                    id: "OFS",
+                    name: "Serving Cat",
+                    type: "pie",
+                    data: browserData,
+                    size: "60%",
+                    dataLabels: {
+                      distance: "-30%",
+                      padding: 0,
+                      allowOverlap: true,
+                      crop: false,
+                      overflow: "none",
+                      formatter: function () {
+                        return this.point.name;
+                      },
+                      color: "black",
+                      /// distance: -30,
+                    },
+                  },
+                },
+                drilldowns2 = {
+                  OFS: {
+                    id: "OFS",
+                    name: "Cap/Non cap",
+                    type: "pie",
+                    data: versionsData,
+                    size: "80%",
+                    innerSize: "60%",
+                    dataLabels: {
+                      padding: 0,
+                      allowOverlap: true,
+                      crop: false,
+                      overflow: "none",
+                      formatter: function () {
+                        // display only if larger than 1
+                        console.log("test", this);
+                        return (
+                          "<b>" +
+                          this.point.name +
+                          ":</b> " +
+                          this.point.servingStatus +
+                          "(" +
+                          this.y +
+                          "%" +
+                          ")"
+                        );
+                      },
+                    },
+                  },
+                },
+                series1 = drilldowns1[e.point.name],
+                series2 = drilldowns2[e.point.name];
+
+              chart.addSingleSeriesAsDrilldown(e.point, series1);
+              chart.addSingleSeriesAsDrilldown(e.point, series2);
+              chart.applyDrilldown();
+            } else if (e.point?.name === "Uncovered") {
+              this.setTitle(null, {
+                text:
+                  "Total Uncovered:" +
+                  Number(projectSummary?.locationsUnCovered)?.toLocaleString(
+                    "en-US"
+                  ),
+              });
+              var chart = this,
+                drilldowns1 = {
+                  Uncovered: {
+                    name: "Uncovered",
+                    type: "pie",
+                    data: browserDataUncoveredCategory,
+                    size: "80%",
+                    dataLabels: {
+                      formatter: function () {
+                        return (
+                          "<b>" +
+                          this.point.name +
+                          ":</b> " +
+                          this.point.servingStatus +
+                          "(" +
+                          this.y +
+                          "%" +
+                          ")"
+                        );
+                      },
+                      color: "black",
+                      //distance: -30,
+                    },
+                  },
+                },
+                series2 = drilldowns1[e.point.name];
+
+              chart.addSingleSeriesAsDrilldown(e.point, series2);
+              chart.applyDrilldown();
+            }
           }
-          return this.key + '<br>' + '<b>' + this.point.noOfSites + '</b>';
+        },
+        drillup: function (e) {
+          this.setTitle(null, {
+            text:
+              "Total Locations:" +
+              Number(projectSummary.totalLocations)?.toLocaleString("en-US") +
+              "<br>" +
+              "OFS: " +
+              (
+                (projectSummary.totalLocCovered /
+                  projectSummary.totalLocations) *
+                100
+              )?.toFixed(2) +
+              "%" +
+              "<br>" +
+              "Uncovered: " +
+              (
+                ((projectSummary.totalLocations -
+                  projectSummary.totalLocCovered) /
+                  projectSummary.totalLocations) *
+                100
+              )?.toFixed(2) +
+              "%",
+          });
+          this.axes.forEach((axis) =>
+            axis.update({ visible: false }, false, false)
+          );
+
+          this.reflow();
         },
       },
     },
-  },
-  tooltip: {
-    formatter: function () {
-      return (
-        this.key +
-        ': ' +
-        '<b>' +
-        this.point.noOfSites +
-        '</b>' +
-        '<br>' +
-        'OFS: ' +
-        '<b>' +
-        this.point.locationsCovered +
-        '</b>' +
-        '<br>' +
-        'Usable Cap: ' +
-        '<b>' +
-        this.point.usableCapacity +
-        '</b>'
-      );
+    title: {
+      text: "Location Serving Category Summary",
+      style: {
+        fontWeight: "bold",
+        fontSize: "12px",
+        color: "#CD040B",
+        fontFamily: '"nhg-display-bold", arial, sans-serif',
+      },
+      x: -10,
+      y: 20,
     },
-  },
-  series: [
-    {
-      name: 'Sites',
-      colorByPoint: true,
-      size: '60%',
-      innerSize: '70%',
-      data: [
-        {
-          name: 'Existing On Air Sites',
-          y:
-            projectSummary.existingOnAirProjects /
-            projectSummary.totalSites /
-            100,
-          //color: "#58508D",
-          noOfSites: Number(
-            projectSummary?.existingOnAirProjects
-          )?.toLocaleString('en-US'),
-          locationsCovered: Number(
-            projectSummary?.locCoveredExistProj
-          )?.toLocaleString('en-US'),
-          usableCapacity: locationDetails?.existingOnAirProjUsableCap,
-        },
-        {
-          name: 'Embedded Base - Active Project (Mod)',
-          y: projectSummary.embActiveProjects / projectSummary.totalSites / 100,
-
-          noOfSites: Number(projectSummary?.embActiveProjects)?.toLocaleString(
-            'en-US'
-          ),
-          locationsCovered: Number(
-            projectSummary?.locCoveredEmbActiveProj
-          )?.toLocaleString('en-US'),
-          usableCapacity: locationDetails?.embActiveProjUsableCap,
-
-          color: 'rgb(92, 92, 97)',
-        },
-        {
-          name: 'Embedded Base - No Active Project (Mod)',
-          y:
-            projectSummary.embNotActiveProjects /
-            projectSummary.totalSites /
-            100,
-
-          noOfSites: Number(
-            projectSummary?.embNotActiveProjects
-          )?.toLocaleString('en-US'),
-          locationsCovered: projectSummary?.locCoveredEmbNotActiveProj,
-          usableCapacity: locationDetails?.embNotActiveProjUsableCap,
-          color: 'rgb(255,188,117)',
-        },
-        {
-          name: 'New Build - Active Project',
-          y: projectSummary.nbActiveProjects / projectSummary.totalSites / 100,
-
-          noOfSites: Number(projectSummary?.nbActiveProjects)?.toLocaleString(
-            'en-US'
-          ),
-          locationsCovered: Number(
-            projectSummary?.locCoveredNbActiveProj
-          )?.toLocaleString('en-US'),
-          usableCapacity: locationDetails?.nbActiveProjUsableCap,
-          color: '#92B1B6',
-        },
-
-        {
-          name: 'New Build - No Active Project (SMDB Existing Structure)',
-          y: projectSummary.nbSmdbProjects / projectSummary.totalSites / 100,
-
-          noOfSites: Number(projectSummary?.nbSmdbProjects)?.toLocaleString(
-            'en-US'
-          ),
-          locationsCovered: Number(
-            projectSummary?.locCoveredNbSmdbProj
-          )?.toLocaleString('en-US'),
-          usableCapacity: locationDetails?.nbSmdbProjUsableCap,
-          color: 'rgb(153,158,255)',
-        },
-        {
-          name: 'New Build - No Active Project (Raw Land)',
-          y: projectSummary.nbRawLandProjects / projectSummary.totalSites / 100,
-          color: 'rgb(153,158,255)',
-          noOfSites: Number(projectSummary?.nbRawLandProjects)?.toLocaleString(
-            'en-US'
-          ),
-          locationsCovered: Number(
-            projectSummary?.locCoveredNbRawLandProj
-          )?.toLocaleString('en-US'),
-          usableCapacity: locationDetails?.nbRawLandProjUsableCap,
-          color: 'rgb(241,92,128)',
-        },
-      ],
+    subtitle: {
+      text:
+        "Total Locations:" +
+        Number(projectSummary.totalLocations)?.toLocaleString("en-US") +
+        "<br>" +
+        "OFS: " +
+        (projectSummary.totalLocations > 0 ? (projectSummary.totalLocCovered / projectSummary.totalLocations) *
+          100 : 0
+        )?.toFixed(2) +
+        "%" +
+        "<br>" +
+        "Uncovered: " +
+        (
+          projectSummary.totalLocations > 0 ? ((projectSummary.totalLocations - projectSummary.totalLocCovered) /
+            projectSummary.totalLocations) *
+            100 : 0
+        )?.toFixed(2) +
+        "%",
+      style: {
+        fontSize: "10px",
+        color: "black",
+      },
+      x: -10,
+      y: 40,
     },
-  ],
-  exporting: {
-    buttons: {
-      contextButton: {},
+
+    plotOptions: {
+      allowPointSelect: true,
+      cursor: "pointer",
+      pie: {
+        // size: 150,
+      },
+      series: {
+        dataLabels: {
+          enabled: true,
+          padding: 0,
+          allowOverlap: true,
+          crop: false,
+          overflow: "none",
+          formatter: function () {
+            if (this.y === 0) {
+              return null;
+            }
+            if (this.key === "OFS" || this.key === "Uncovered") {
+              return "<b>" + this.key + "</b><br>" + this.point.noOfLocations;
+            } else {
+              return this.point.noOfLocations;
+            }
+          },
+        },
+      },
     },
-  },
-};
+    tooltip: {
+      formatter: function () {
+        return "<b>" + this.point.toolTipName + ":</b> " + this.y + "%";
+      },
+    },
 
-// const options: Highcharts.Options = {
-//   title: {
-//     text: 'My chart',
-//   },
-//   series: [
-//     {
-//       type: 'line',
-//       data: [1, 2, 3],
-//     },
-//   ],
-// };
+    series: [
+      {
+        name: "Locations",
+        colorByPoint: true,
+        size: "60%",
+        data: [
+          {
+            name: "OFS",
+            y: Number(
+              (projectSummary.totalLocations > 0 ? (projectSummary.totalLocCovered /
+                projectSummary.totalLocations) *
+                100 : 0
+              ).toFixed(2)
+            ),
+            noOfLocations: Number(
+              projectSummary?.totalLocCovered
+            )?.toLocaleString("en-US"),
+            noOfSites: Number(projectSummary?.totalSites)?.toLocaleString(
+              "en-US"
+            ),
+            color: "#FF6361",
+            drilldown: true,
+            toolTipName: "OFS",
+          },
+          {
+            name: "Uncovered",
 
-// React supports function components as a simple way to write components that
-// only contain a render method without any state (the App component in this
-// example).
-
-const App = (props: HighchartsReact.Props) => {
-  const chartComponentRef = useRef(null);
-
-  return (
-    <HighchartsReact
-      highcharts={Highcharts}
-      options={options}
-      ref={chartComponentRef}
-      {...props}
-    />
-  );
-};
-
-export default App;
+            y: Number(
+              (projectSummary.totalLocations > 0 ? ((projectSummary.totalLocations -
+                projectSummary.totalLocCovered) /
+                projectSummary.totalLocations) *
+                100 : 0
+              ).toFixed(2)
+            ),
+            noOfLocations: Number(
+              projectSummary.totalLocations - projectSummary.totalLocCovered
+            )?.toLocaleString("en-US"),
+            color: "#58508D",
+            drilldown: true,
+            toolTipName: "Uncovered",
+          },
+        ],
+      },
+    ],
+  }
